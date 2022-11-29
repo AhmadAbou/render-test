@@ -1,44 +1,41 @@
 const express = require("express");
-const request = require("request");
 const axios = require("axios").default;
 const app = express();
 const port = 3000;
 const cors = require("cors");
 
-// const make_API_call = function (url) {
-//   return new Promise((resolve, reject) => {
-//     request(url, { json: true }, (err, res, body) => {
-//       if (err) reject(err);
-//       resolve(body);
-//     });
-//   });
-// };
+//Add Google Classroom CLient ID and Secret
 
-// const getDataFromServer = async () => {
+// Google Classroom API, Getting Submissions
+// const getDataFromServerAxios = async () => {
 //   try {
-//     const res = await make_API_call(
-//       "https://jsonplaceholder.typicode.com/todos"
+//     const response = await axios.get(
+//       "https://jsonplaceholder.typicode.com/todos",
+//       {
+//         headers: {
+//           "Accept-Encoding": "application/json",
+//         },
+//       }
 //     );
-//     return res;
+//     return response.data;
 //   } catch (err) {
 //     console.log(err);
-//     return "ERROR OCCURED";
+//     return "ERROR";
 //   }
 // };
 
 const getDataFromServerAxios = async () => {
   try {
-    const response = await axios.get(
-      "https://jsonplaceholder.typicode.com/todos",
-      {
-        headers: {
-          "Accept-Encoding": "application/json",
-        },
-      }
-    );
+    const response = await axios.get("http://localhost:1337/api/submissions", {
+      headers: {
+        "Accept-Encoding": "application/json",
+        Authorization:
+          "Bearer " +
+          "3c948a3de09a11170afd6b068cbf4580ec53b35b5776a5d51d17129bd19656ac3f7871b54b37eb524f90f8c2f954f85d99bf779fd82267e41a4069847efc2b0a67a48ed4bc5562e12b0687e0231f54c81b6ccb0d1a150996a3ad4a287827169dd89bad5a22ead77e0cf5b47cf0e8550d1c6aa92f764f52e6b6a4180827400028",
+      },
+    });
     return response.data;
   } catch (err) {
-    console.log(err);
     return "ERROR";
   }
 };
@@ -48,17 +45,25 @@ app.use(express.json({ limit: "50mb" }));
 
 app.get("/", async (req, res) => {
   try {
-    const data = await getDataFromServerAxios();
+    let data = await getDataFromServerAxios();
+    console.log("THIS IS DATA", data);
     const dataToSend = {
-      dataFromExpress: data,
+      data: data.data[0].attributes,
     };
-    axios.post(
-      "https://webhook.site/592359ce-ca0a-405f-ba6f-291eb79317b2",
-      dataToSend
-    );
+    data = dataToSend;
+    console.log(dataToSend);
+    axios.post("http://localhost:1337/api/submissions", data, {
+      headers: {
+        Authorization:
+          "Bearer " +
+          "3c948a3de09a11170afd6b068cbf4580ec53b35b5776a5d51d17129bd19656ac3f7871b54b37eb524f90f8c2f954f85d99bf779fd82267e41a4069847efc2b0a67a48ed4bc5562e12b0687e0231f54c81b6ccb0d1a150996a3ad4a287827169dd89bad5a22ead77e0cf5b47cf0e8550d1c6aa92f764f52e6b6a4180827400028",
+      },
+    });
 
-    res.status(200).json(data);
+    res.status(200).json("NULL");
   } catch (err) {
+    console.log(err);
+    console.log("HELLLLLOOOOOOOO");
     res.status(500).json({ message: err });
   }
 });
